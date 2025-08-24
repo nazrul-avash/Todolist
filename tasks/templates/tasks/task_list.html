@@ -17,116 +17,187 @@
   <!-- Container -->
   <div class="max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow p-6 w-full">
 
-    <!-- New Task Button -->
-    <div class="flex justify-end mb-4">
+    <!-- Buttons -->
+    <div class="flex justify-end mb-4 gap-2">
       <button id="openModal" 
               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
         + New Task
       </button>
+      <a href="{% url 'completed_task_list' %}">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          + History
+        </button>
+      </a>
     </div>
 
-  <!-- Task Table -->
-{% if tasks %}
-  <div class="overflow-x-auto">
-    <table class="min-w-full border border-gray-200 divide-y divide-gray-200 rounded-lg shadow-sm">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Done</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Task</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tag</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Deadline</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        {% for task in tasks %}
-          <tr class="hover:bg-gray-50">
+    <!-- Task Table -->
+    {% if tasks %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-200 divide-y divide-gray-200 rounded-lg shadow-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2"></th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Task</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tag</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Deadline</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for task in tasks %}
+          <tr class="hover:bg-gray-50" data-task-id="{{ task.id }}">
             <!-- Checkbox -->
-            <td class="px-4 py-2">
-              <input type="checkbox"
-                     class="w-5 h-5 text-blue-600 rounded border-gray-300 task-checkbox"
-                     data-task-id="{{ task.id }}"
+            <td class="px-2 py-2">
+              <input type="checkbox" class="w-5 h-5 text-blue-600 rounded border-gray-300 task-checkbox"
                      {% if task.status == 'C' %}checked{% endif %}>
             </td>
-
-            <!-- Task name -->
-            <td class="px-4 py-2">
-              <span class="task-name {% if task.status == 'C' %}line-through text-gray-400{% endif %}">
-                {{ task.name }}
-              </span>
+            <!-- Task Name -->
+            <td class="task-name px-2 py-2 {% if task.status == 'C' %}line-through text-gray-400{% endif %}">
+              {{ task.name }}
             </td>
-
             <!-- Tag -->
-            <td class="px-4 py-2 text-sm text-gray-600">
-              {{ task.get_tag_display }}
-            </td>
-
+            <td class="task-tag px-2 py-2 text-sm text-gray-600">{{ task.get_tag_display }}</td>
             <!-- Deadline -->
-            <td class="px-4 py-2 text-sm text-gray-600">
-              {{ task.deadline }}
+            <td class="task-deadline px-2 py-2 text-sm text-gray-600">{{ task.deadline }}</td>
+            <!-- Actions -->
+            <td class="px-2 py-2 flex gap-2">
+              <!-- Edit icon -->
+              <a href="#" class="edit-btn text-yellow-500 hover:text-yellow-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536M16 3l5 5-11 11H5v-5l11-11z"/>
+                </svg>
+              </a>
+              <!-- Delete icon -->
+              <button class="text-red-500 hover:text-red-600 p-0 delete-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-6-4h6a2 2 0 012 2v2H7V5a2 2 0 012-2z"/>
+                </svg>
+              </button>
             </td>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% else %}
-  <p class="text-center text-gray-500">No tasks yet. ✨</p>
-{% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-center text-gray-500">No tasks yet. ✨</p>
+    {% endif %}
 
+  </div>
 
   <!-- Modal -->
- <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
-  <div class="bg-white p-6 rounded-2xl shadow-lg w-96">
-    <h2 class="text-xl font-bold mb-4">Add New Task</h2>
-      <form method="POST"  action="{% url 'add_task' %}">
+  <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-white p-6 rounded-2xl shadow-lg w-96">
+      <h2 class="text-xl font-bold mb-4" id="modalTitle">Add New Task</h2>
+      <form method="POST" id="taskForm" action="{% url 'add_task' %}">
         {% csrf_token %}
         <!-- Name -->
         <div class="mb-3">
           <label class="block text-gray-700">Task Name</label>
-          <input type="text" name="name" maxlength="200" required
+          <input type="text" name="name" id="taskName" maxlength="200" required
                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-        <!-- Description -->
-        <div class="mb-3">
-          <label class="block text-gray-700">Description</label>
-          <textarea name="description" rows="3"
-                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-        </div>
-        
         <!-- Tag -->
         <div class="mb-3">
           <label class="block text-gray-700">Tag</label>
-          <select name="tag" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          <select name="tag" id="taskTag" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="S">Shopping</option>
             <option value="W">Work</option>
             <option value="O">Other</option>
-            <option value="A" selected>All</option>
           </select>
         </div>
         <!-- Deadline -->
         <div class="mb-3">
           <label class="block text-gray-700">Deadline</label>
-          <input type="datetime-local" name="deadline"
+          <input type="date" name="deadline" id="taskDeadline"
                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-
         <!-- Buttons -->
         <div class="mt-4 flex justify-end gap-2">
-        <button type="button" id="closeModal" class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">Cancel</button>
-        <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Save</button>
-      </div>
+          <button type="button" id="closeModal" class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Save</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal JS -->
+  <!-- JS -->
   <script>
     const modal = document.getElementById("taskModal");
     const openBtn = document.getElementById("openModal");
     const closeBtn = document.getElementById("closeModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const taskForm = document.getElementById("taskForm");
+    const taskName = document.getElementById("taskName");
+    const taskTag = document.getElementById("taskTag");
+    const taskDeadline = document.getElementById("taskDeadline");
 
-    openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+    // Open modal for adding new task
+    openBtn.addEventListener("click", () => {
+      modal.classList.remove("hidden");
+      taskForm.reset();
+      taskForm.action = "{% url 'add_task' %}";
+      modalTitle.textContent = "Add New Task";
+    });
+
+    // Close modal
     closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Handle checkbox toggle
+      document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const tr = checkbox.closest('tr');
+          const taskId = tr.dataset.taskId;
+          fetch("{% url 'update_status' 0 %}".replace('0', taskId), {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({status: checkbox.checked ? 'C' : 'I'})
+          }).then(() => location.reload());
+        });
+      });
+
+      // Handle delete button
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('Delete this task?')) return;
+          const tr = btn.closest('tr');
+          const taskId = tr.dataset.taskId;
+          fetch("{% url 'delete_task' 0 %}".replace('0', taskId), {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+            }
+          }).then(() => tr.remove());
+        });
+      });
+
+      // Handle edit button
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          const tr = btn.closest('tr');
+          const taskId = tr.dataset.taskId;
+          const name = tr.querySelector('.task-name').textContent.trim();
+          const tag = tr.querySelector('.task-tag').textContent.trim();
+          const deadline = tr.querySelector('.task-deadline').textContent.trim();
+
+          taskName.value = name;
+          taskTag.value = tag; 
+          taskDeadline.value = deadline;
+          taskForm.action = `/tasks/${taskId}/edit_task/`;
+          modalTitle.textContent = "Edit Task";
+          modal.classList.remove("hidden");
+        });
+      });
+    });
   </script>
 
 </body>

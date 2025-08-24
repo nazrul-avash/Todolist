@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My To-Do List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Banner -->
+  <div class="w-full h-48 bg-cover bg-center flex items-center justify-center"
+       style="background-image: url('{% static "tasks/img/bannner.jpg" %}');">
+    <h1 class="text-5xl text-white font-bold drop-shadow-lg">My Tasks</h1>
+  </div>
+
+  <!-- Container -->
+  <div class="max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow p-6 w-full">
+
+    <!-- New Task Button -->
+    <div class="flex justify-end mb-4">
+      <button id="openModal" 
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+        + New Task
+      </button>
+    </div>
+
+  <!-- Task Table -->
+{% if tasks %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 divide-y divide-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700"></th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Task</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tag</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Deadline</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for task in tasks %}
+          <tr class="hover:bg-gray-50">
+            <!-- Checkbox -->
+            <td class="px-4 py-2">
+             <input type="checkbox"
+       class="w-5 h-5 text-blue-600 rounded border-gray-300 task-checkbox"
+       data-task-id="{{ task.id }}"
+       {% if task.status == 'C' %}checked{% endif %}>
+            </td>
+
+            <!-- Task name -->
+            <td class="px-4 py-2">
+              <span class="task-name {% if task.status == 'C' %}line-through text-gray-400{% endif %}">
+                {{ task.name }}
+              </span>
+            </td>
+
+            <!-- Tag -->
+            <td class="px-4 py-2 text-sm text-gray-600">
+              {{ task.get_tag_display }}
+            </td>
+
+            <!-- Deadline -->
+            <td class="px-4 py-2 text-sm text-gray-600">
+              {{ task.deadline }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="text-center text-gray-500">No Completed tasks yet. ✨</p>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const taskId = checkbox.dataset.taskId;
+      const status = checkbox.checked ? 'C' : 'I';
+
+      fetch("{% url 'update_status' 0 %}".replace('0', taskId), {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({status: status})
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        location.reload();
+      });
+    });
+  });
+});
+</script>
+
+
+
+
+</body>
+</html>

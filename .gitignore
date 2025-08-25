@@ -1,2 +1,44 @@
 __pycache__/
 *.pyc
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.manifest
+*.spec
+
+# ---- Django ----
+db.sqlite3
+*.log
+*.pot
+*.pyc
+staticfiles/
+media/
+
+# ---- Environments ----
+venv/
+env/
+.venv/
+ENV/
+.env
+.env.*
+
+# ---- IDEs & Editors ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# ---- OS / Misc ----
+.DS_Store
+Thumbs.db
+desktop.ini

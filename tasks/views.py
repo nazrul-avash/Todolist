@@ -10,7 +10,7 @@ def task_list(request):
     dos = Task.objects.filter(status='I').order_by('-deadline')
     return render(request,'tasks/task_list.html',{'tasks':dos})
 def add_task(request):
-    
+
     if request.method == 'POST':
         form = TaskForm(request.POST)
         print(form.is_valid())
